@@ -1,0 +1,52 @@
+@startuml slay_the_spire_schema
+
+!define TABLE(name) class name << (T, #FFAAAA) >>
+!define PK(field) <b>field</b>
+!define FK(field) <i>field</i>
+
+TABLE(cards) {
+    PK(id) SERIAL
+    --
+    name VARCHAR(100)
+    card_type VARCHAR(20)
+    cost INTEGER
+    description TEXT
+    damage INTEGER
+    block INTEGER
+    rarity VARCHAR(20)
+}
+
+TABLE(enemies) {
+    PK(id) SERIAL
+    --
+    name VARCHAR(100)
+    max_hp INTEGER
+    floor_min INTEGER
+    floor_max INTEGER
+    actions JSONB
+}
+
+TABLE(runs) {
+    PK(id) SERIAL
+    --
+    player_name VARCHAR(100)
+    current_hp INTEGER
+    max_hp INTEGER
+    current_floor INTEGER
+    gold INTEGER
+    outcome VARCHAR(20)
+    started_at TIMESTAMP
+}
+    
+TABLE(run_cards) {
+    PK(id) SERIAL
+    --
+    FK(run_id) INTEGER
+    FK(card_id) INTEGER
+    source VARCHAR(20)
+}
+
+runs "1" --o{ "0..*" run_cards : "has"
+cards "1" --o{ "0..*" run_cards : "included in"
+
+@enduml
