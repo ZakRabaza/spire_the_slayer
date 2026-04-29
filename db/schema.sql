@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS cards (
     block       INTEGER      NOT NULL DEFAULT 0,
     rarity      VARCHAR(20)  NOT NULL DEFAULT 'common'
                              CHECK (rarity IN ('starter', 'common', 'uncommon', 'rare'))
+    playable    BOOLEAN      NOT NULL DEFAULT false
 );
 
 -- Enemies catalog (static data)
