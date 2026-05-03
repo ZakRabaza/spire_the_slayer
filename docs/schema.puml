@@ -1,4 +1,4 @@
-@startuml slay_the_spire_schema
+@startuml spire_the_slayer_schema
 
 !define TABLE(name) class name << (T, #FFAAAA) >>
 !define PK(field) <b>field</b>
@@ -14,6 +14,7 @@ TABLE(cards) {
     damage INTEGER
     block INTEGER
     rarity VARCHAR(20)
+    playable BOOLEAN
 }
 
 TABLE(enemies) {
