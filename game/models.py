@@ -145,7 +145,7 @@ class Player:
         """
         absorbed = min(self.block, amount)
         self.block -= absorbed
-        self.hp -= (amount - absorbed)
+        self.hp = max(0, self.hp - (amount - absorbed))
 
     def gain_block(self, amount: int):
         """
@@ -261,7 +261,7 @@ class Enemy:
         """
         absorbed = min(self.block, amount)
         self.block -= absorbed
-        self.hp -= (amount - absorbed)
+        self.hp = max(0, self.hp - (amount - absorbed))
 
     def gain_block(self, amount: int):
         """
