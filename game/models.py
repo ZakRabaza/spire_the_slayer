@@ -263,6 +263,18 @@ class Enemy:
         self.block -= absorbed
         self.hp -= (amount - absorbed)
 
+    def gain_block(self, amount: int):
+        """
+            Add block to the enemy.
+        """
+        self.block += amount
+
+    def start_turn(self):
+        """
+            Reset block at the start of the enemy's turn.
+        """
+        self.block = 0
+
     @property
     def is_alive(self) -> bool:
         """
