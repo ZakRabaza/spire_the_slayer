@@ -1,4 +1,4 @@
-from game.models import Deck, Player, Enemy
+from game.models import Card, Deck, Player, Enemy
 from game.combat import CombatEngine
 from db.database import (
     get_run, get_deck_for_run,
@@ -25,6 +25,62 @@ def build_player(run_id: int) -> tuple[Player, int]:
     )
     return player, run['current_floor']
 
+def display_hand(hand: list[Card]):
+    """
+        Display all cards in hand side by side.
+        Each card is built line by line then joined horizontally.
+    """
+    width = 22
+
+    def card_lines(i: int, card: Card) -> list[str]:
+        lines = []
+        lines.append(f"  ┌{'─' * (width - 3)}[{i}]┐")
+        lines.append(f"  │ {card.name:<{width - 1}}│")
+        lines.append(f"  │ Cost: {str(card.cost):<{width - 7}}│")
+        lines.append(f"  │ {card.description[:width - 1]:<{width - 1}}│")
+        if card.damage > 0:
+            lines.append(f"  │ Damage: {card.damage:<{width - 9}}│")
+        else:
+            lines.append(f"  │{' ' * width}│")
+        if card.block > 0:
+            lines.append(f"  │ Block:  {card.block:<{width - 9}}│")
+        else:
+            lines.append(f"  │{' ' * width}│")
+        lines.append(f"  └{'─' * width}┘")
+        return lines
+
+    # build lines for each card
+    all_cards_lines = [card_lines(i, card) for i, card in enumerate(hand, 1)]
+
+    # zip joins each row across all cards and prints them on the same line
+    print("\nYour hand:")
+    for row in zip(*all_cards_lines):
+        print("".join(row))
+
+def display_enemy(enemy: Enemy):
+    """
+        Display the enemy's current state and upcoming action.
+    """
+    intent = enemy.get_intent()
+    width = 40
+
+    print(f"\n  ┌{'─' * (width)}┐")
+    print(f"  │ {enemy.name:<{width - 1}}│")
+    print(f"  │ HP: {enemy.hp}/{enemy.max_hp:<{width - 8}}│")
+    if enemy.block > 0:
+        print(f"  │ Block: {enemy.block:<{width - 8}}│")
+    else:
+        print(f"  │{' ' * width}│")
+    print(f"  │ Intent: {intent['desc']:<{width - 9}}│")
+    if intent['type'] == 'attack':
+        dmg = intent['value'] + enemy.strength
+        print(f"  │ Damage: {dmg:<{width - 9}}│")
+    elif intent['type'] == 'defend':
+        print(f"  │ Block:  {intent['value']:<{width - 9}}│")
+    elif intent['type'] == 'buff':
+        print(f"  │ Strength +{intent['value']:<{width - 11}}│")
+    print(f"  └{'─' * width}┘")
+
 
 def run_combat(player: Player, enemy: Enemy) -> bool:
     """
@@ -36,23 +92,31 @@ def run_combat(player: Player, enemy: Enemy) -> bool:
 
     while not combat.is_over:
         print(f"\n{'─' * 40}")
-        print(f"{player} | {enemy}")
-        print(f"Energy: {player.energy} | Intent: {enemy.get_intent()['desc']}")
-        print(f"Hand: {[c.name for c in player.deck.hand]}")
-        print("─" * 40)
+        display_enemy(enemy)
+        print(f"{player}")
+        print(f"Energy: {player.energy}")
+        print('─' * 40)
 
-        action = input("Play card (name) or 'end' to end turn: ").strip().lower()
+        display_hand(player.deck.hand)
 
-        if action == "end":
+        print("\n  0. End turn")
+        action = input("\nYour choice: ").strip()
+
+        if action == "0":
             combat.end_turn()
             continue
 
-        card = next((c for c in player.deck.hand
-                     if c.name.lower() == action), None)
-
-        if card is None:
-            print(f"Card '{action}' not found in hand.")
+        if not action.isdigit():
+            print("Enter a number.")
             continue
+
+        index = int(action) - 1
+
+        if index < 0 or index >= len(player.deck.hand):
+            print(f"Enter a number between 1 and {len(player.deck.hand)}.")
+            continue
+
+        card = player.deck.hand[index]
 
         try:
             combat.play_card(card)
