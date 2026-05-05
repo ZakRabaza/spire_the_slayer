@@ -5,57 +5,9 @@ from db.database import (
     get_enemy_for_floor, get_reward_cards,
     save_run_after_combat, end_run
 )
+from game.colors import Color
 
 MAX_FLOORS = 10
-
-
-class Color:
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-
-    # text colors
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-
-    # bright variants
-    BRED = "\033[91m"
-    BGREEN = "\033[92m"
-    BYELLOW = "\033[93m"
-    BBLUE = "\033[94m"
-    BCYAN = "\033[96m"
-
-    @staticmethod
-    def red(text):    return f"\033[31m{text}\033[0m"
-
-    @staticmethod
-    def green(text):  return f"\033[32m{text}\033[0m"
-
-    @staticmethod
-    def yellow(text): return f"\033[33m{text}\033[0m"
-
-    @staticmethod
-    def blue(text):   return f"\033[34m{text}\033[0m"
-
-    @staticmethod
-    def cyan(text):   return f"\033[36m{text}\033[0m"
-
-    @staticmethod
-    def bold(text):   return f"\033[1m{text}\033[0m"
-
-    @staticmethod
-    def hp_color(hp: int, max_hp: int) -> str:
-        ratio = hp / max_hp
-        if ratio > 0.5:
-            return Color.green(f"{hp}/{max_hp}")
-        elif ratio > 0.25:
-            return Color.yellow(f"{hp}/{max_hp}")
-        else:
-            return Color.red(f"{hp}/{max_hp}")
-
 
 def build_player(run_id: int) -> tuple[Player, int]:
     """
@@ -80,16 +32,16 @@ def display_hand(hand: list[Card]):
         lines = []
         lines.append(f"  ┌{'─' * (width - 3)}[{Color.yellow(str(i))}]┐")
         lines.append(f"  │ {Color.bold(card.name):<{width + 7}}│")
-        lines.append(f"  │ {Color.yellow(f'Cost: {card.cost}'):<{width + 7}}│")
+        lines.append(f"  │ {Color.yellow(f'Cost: {card.cost}'):<{width + 8}}│")
         lines.append(f"  │ {card.description[:width - 1]:<{width - 1}}│")
         if card.damage > 0:
-            lines.append(f"  │ {Color.red(f'Damage: {card.damage}'):<{width + 7}}│")
+            lines.append(f"  │ {Color.red(f'Damage: {card.damage}'):<{width + 8}}│")
         else:
-            lines.append(f"  │{' ' * width}  │")
+            lines.append(f"  │{' ' * width}│")
         if card.block > 0:
-            lines.append(f"  │ {Color.cyan(f'Block:  {card.block}'):<{width + 7}}│")
+            lines.append(f"  │ {Color.cyan(f'Block:  {card.block}'):<{width + 8}}│")
         else:
-            lines.append(f"  │{' ' * width}  │")
+            lines.append(f"  │{' ' * width}│")
         lines.append(f"  └{'─' * width}┘")
         return lines
 
@@ -106,16 +58,16 @@ def display_enemy(enemy: Enemy):
 
     print(f"\n  ┌{'─' * width}┐")
     print(f"  │ {Color.bold(enemy.name):<{width + 7}}│")
-    print(f"  │ HP: {Color.hp_color(enemy.hp, enemy.max_hp):<{width + 8}}│")
+    print(f"  │ HP: {Color.hp_color(enemy.hp, enemy.max_hp):<{width + 4}}│")
     if enemy.block > 0:
-        print(f"  │ {Color.cyan(f'Block: {enemy.block}'):<{width + 8}}│")
+        print(f"  │ {Color.cyan(f'Block: {enemy.block}'):<{width + 5}}│")
     else:
-        print(f"  │{' ' * width}  │")
+        print(f"  │{' ' * width}│")
 
     if intent['type'] == 'attack':
         dmg = intent['value'] + enemy.strength
-        print(f"  │ Intent: {Color.red(intent['desc']):<{width + 9}}│")
-        print(f"  │ {Color.red(f'Damage: {dmg}'):<{width + 7}}│")
+        print(f"  │ Intent: {Color.red(intent['desc']):<{width + 0}}│")
+        print(f"  │ {Color.red(f'Damage: {dmg}'):<{width + 8}}│")
     elif intent['type'] == 'defend':
         block_val = intent['value']
         print(f"  │ Intent: {Color.cyan(intent['desc']):<{width + 7}}│")
