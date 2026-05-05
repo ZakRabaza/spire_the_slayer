@@ -10,7 +10,7 @@ DB_CONFIG = {
     "dbname":   "spire_the_slayer",
     "user":     "postgres",
     "password": "root",
-    "host":     "localhost",
+    "host":     "172.17.58.171",
     "port":     5432,
 }
 
@@ -212,5 +212,25 @@ def end_run(run_id: int, outcome: str):
                 cur.execute("""
                     UPDATE runs SET outcome = %s WHERE id = %s
                 """, (outcome, run_id))
+    finally:
+        conn.close()
+
+
+def get_ongoing_runs() -> list[dict]:
+    """
+        Return all ongoing runs ordered by most recent first.
+        Used by main.py to let the player resume an existing run.
+    """
+    conn = get_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                        SELECT id, player_name, current_hp, max_hp, current_floor
+                        FROM runs
+                        WHERE outcome = 'ongoing'
+                        ORDER BY id DESC
+                        """)
+            rows = cur.fetchall()
+        return [dict(row) for row in rows]
     finally:
         conn.close()
