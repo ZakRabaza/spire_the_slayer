@@ -1,39 +1,51 @@
 class Color:
+    # style
     RESET = "\033[0m"
     BOLD = "\033[1m"
+    DIM = '\033[2m'
+    NORMAL = '\033[22m'
 
     # text colors
+    BLACK = '\033[30m'
     RED = "\033[31m"
     GREEN = "\033[32m"
     YELLOW = "\033[33m"
     BLUE = "\033[34m"
+    MAGENTA = '\033[35m'
     CYAN = "\033[36m"
     WHITE = "\033[37m"
 
-    # bright variants
-    BRED = "\033[91m"
-    BGREEN = "\033[92m"
-    BYELLOW = "\033[93m"
-    BBLUE = "\033[94m"
-    BCYAN = "\033[96m"
+    @staticmethod
+    def black(text):
+        return f"{Color.BLACK}{text}{Color.RESET}"
 
     @staticmethod
-    def red(text):    return f"\033[31m{text}\033[0m"
+    def red(text):
+        return f"{Color.RED}{text}{Color.RESET}"
 
     @staticmethod
-    def green(text):  return f"\033[32m{text}\033[0m"
+    def green(text):
+        return f"{Color.GREEN}{text}{Color.RESET}"
 
     @staticmethod
-    def yellow(text): return f"\033[33m{text}\033[0m"
+    def yellow(text):
+        return f"{Color.YELLOW}{text}{Color.RESET}"
 
     @staticmethod
-    def blue(text):   return f"\033[34m{text}\033[0m"
+    def blue(text):
+        return f"{Color.BLUE}{text}{Color.RESET}"
 
     @staticmethod
-    def cyan(text):   return f"\033[36m{text}\033[0m"
+    def magenta(text):
+        return f"{Color.MAGENTA}{text}{Color.RESET}"
 
     @staticmethod
-    def bold(text):   return f"\033[1m{text}\033[0m"
+    def cyan(text):
+        return f"{Color.CYAN}{text}{Color.RESET}"
+
+    @staticmethod
+    def bold(text):
+        return f"{Color.BOLD}{text}{Color.RESET}"
 
     @staticmethod
     def hp_color(hp: int, max_hp: int) -> str:
