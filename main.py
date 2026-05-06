@@ -14,7 +14,7 @@ def main():
         return
 
     # new run
-    name = input("\nEnter your name: ").strip()
+    name = input("\nEnter your name: ").strip()[:20]
     if not name:
         name = "Player"
 
