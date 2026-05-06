@@ -1,11 +1,13 @@
 from game.models import Card, Deck, Player, Enemy
 from game.combat import CombatEngine
-from db.database import (
-    get_run, get_deck_for_run,
-    get_enemy_for_floor, get_reward_cards,
-    save_run_after_combat, end_run
-)
 from game.colors import Color
+from game.display import (
+    display_hand, display_enemy, display_player, display_floor, display_separator, display_ongoing_runs, display_rewards
+)
+from db.database import (
+    get_run, get_deck_for_run,get_enemy_for_floor, get_reward_cards, save_run_after_combat, end_run, get_ongoing_runs
+)
+
 
 MAX_FLOORS = 10
 
@@ -25,76 +27,20 @@ def build_player(run_id: int) -> tuple[Player, int]:
     )
     return player, run['current_floor']
 
-def display_hand(hand: list[Card]):
-    width = 22
-
-    def card_lines(i: int, card: Card) -> list[str]:
-        lines = []
-        lines.append(f"  ┌{'─' * (width - 3)}[{Color.yellow(str(i))}]┐")
-        lines.append(f"  │ {Color.bold(card.name):<{width + 7}}│")
-        lines.append(f"  │ {Color.yellow(f'Cost: {card.cost}'):<{width + 8}}│")
-        lines.append(f"  │ {card.description[:width - 1]:<{width - 1}}│")
-        if card.damage > 0:
-            lines.append(f"  │ {Color.red(f'Damage: {card.damage}'):<{width + 8}}│")
-        else:
-            lines.append(f"  │{' ' * width}│")
-        if card.block > 0:
-            lines.append(f"  │ {Color.cyan(f'Block:  {card.block}'):<{width + 8}}│")
-        else:
-            lines.append(f"  │{' ' * width}│")
-        lines.append(f"  └{'─' * width}┘")
-        return lines
-
-    all_cards_lines = [card_lines(i, card) for i, card in enumerate(hand, 1)]
-
-    print(f"\n{Color.bold('Your hand:')}")
-    for row in zip(*all_cards_lines):
-        print("".join(row))
-
-
-def display_enemy(enemy: Enemy):
-    intent = enemy.get_intent()
-    width = 40
-
-    print(f"\n  ┌{'─' * width}┐")
-    print(f"  │ {Color.bold(enemy.name):<{width + 7}}│")
-    print(f"  │ HP: {Color.hp_color(enemy.hp, enemy.max_hp):<{width + 4}}│")
-    if enemy.block > 0:
-        print(f"  │ {Color.cyan(f'Block: {enemy.block}'):<{width + 5}}│")
-    else:
-        print(f"  │{' ' * width}│")
-
-    if intent['type'] == 'attack':
-        dmg = intent['value'] + enemy.strength
-        print(f"  │ Intent: {Color.red(intent['desc']):<{width + 0}}│")
-        print(f"  │ {Color.red(f'Damage: {dmg}'):<{width + 8}}│")
-    elif intent['type'] == 'defend':
-        block_val = intent['value']
-        print(f"  │ Intent: {Color.cyan(intent['desc']):<{width + 7}}│")
-        print(f"  │ {Color.cyan(f'Block: {block_val}'):<{width + 7}}│")
-    elif intent['type'] == 'buff':
-        buff_val = intent['value']
-        print(f"  │ Intent: {Color.yellow(intent['desc']):<{width + 7}}│")
-        print(f"  │ {Color.yellow(f'Strength +{buff_val}'):<{width + 7}}│")
-    print(f"  └{'─' * width}┘")
-
-
 def run_combat(player: Player, enemy: Enemy) -> bool:
     combat = CombatEngine(player, enemy)
     combat.start_combat()
 
     while not combat.is_over:
-        print(f"\n{Color.blue('─' * 40)}")
-        print(f"{Color.bold(player.name)} "
-              f"HP: {Color.hp_color(player.hp, player.max_hp)} "
-              f"Block: {Color.cyan(str(player.block))} "
-              f"Energy: {Color.yellow(str(player.energy))}")
+        print(f"\n")
+        display_separator()
+        display_player(player)
         display_enemy(enemy)
-        print(f"{Color.blue('─' * 40)}")
+        display_separator()
 
         display_hand(player.deck.hand)
 
-        print(f"\n  {Color.yellow('0.')} End turn")
+        print(f"\n  {Color.blue('0.')} End turn")
         action = input(f"\n{Color.bold('Your choice: ')}").strip()
 
         if action == "0":
@@ -120,7 +66,6 @@ def run_combat(player: Player, enemy: Enemy) -> bool:
 
     return combat.player_won
 
-
 def offer_reward(run_id: int, player: Player, current_floor: int):
     """
         Show 3 random playable cards and let the player pick one.
@@ -129,24 +74,21 @@ def offer_reward(run_id: int, player: Player, current_floor: int):
     """
     rewards = get_reward_cards(3)
 
-    print("\nChoose a card to add to your deck:")
-    for i, card in enumerate(rewards, 1):
-        print(f"  {i}. {card}")
-    print("  0. Skip")
+    display_rewards(rewards)
 
     while True:
         try:
-            choice = int(input("Your choice: "))
+            choice = int(input(f"\n{Color.bold('Your choice: ')}"))
             if choice == 0:
                 chosen_id = None
                 break
             if 1 <= choice <= len(rewards):
                 chosen_id = rewards[choice - 1].id
-                print(f"Added {rewards[choice - 1].name} to your deck.")
+                print(Color.green(f"Added {rewards[choice - 1].name} to your deck."))
                 break
-            print(f"Enter a number between 0 and {len(rewards)}.")
+            print(Color.red(f"Enter a number between 0 and {len(rewards)}."))
         except ValueError:
-            print("Enter a valid number.")
+            print(Color.red("Enter a valid number."))
 
     save_run_after_combat(
         run_id=run_id,
@@ -154,7 +96,6 @@ def offer_reward(run_id: int, player: Player, current_floor: int):
         current_floor=current_floor + 1,
         reward_card_id=chosen_id
     )
-
 
 def game_loop(run_id: int):
     """
@@ -166,9 +107,7 @@ def game_loop(run_id: int):
     print(f"Starting on floor {current_floor}.")
 
     while current_floor <= MAX_FLOORS:
-        print(f"\n{Color.blue('═' * 40)}")
-        print(Color.bold(f"Floor {current_floor}"))
-        print(f"{Color.blue('═' * 40)}")
+        display_floor(current_floor)
 
         enemy = get_enemy_for_floor(current_floor)
         print(f"An enemy appears: {enemy.name} (hp={enemy.hp})")
@@ -191,7 +130,26 @@ def game_loop(run_id: int):
 
         player, current_floor = build_player(run_id)
 
+def select_run() -> int | None:
+    """
+        Check for ongoing runs and let the player resume one.
+        Returns a run_id if the player chose to resume, or None if they want to start a new run.
+    """
+    ongoing_runs = get_ongoing_runs()
 
+    if not ongoing_runs:
+        return None
 
+    display_ongoing_runs(ongoing_runs)
 
+    while True:
+        try:
+            choice = int(input("\nYour choice: "))
+            if choice == 0:
+                return None
+            if any(r['id'] == choice for r in ongoing_runs):
+                return choice
+            print(Color.red("Enter a valid run id."))
+        except ValueError:
+            print(Color.red("Enter a valid number."))
 
