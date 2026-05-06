@@ -44,43 +44,18 @@ def display_hand(hand: list[Card]):
     """
         Display all cards in hand side by side with color coding.
         Each card shows name, cost, description, damage and block.
-
-        enumerate(iterable, start=0) :
-            Return an enumerate object. iterable must be a sequence, an iterator, or some other object which supports iteration.
-            The __next__() method of the iterator returned by enumerate() returns a tuple containing a count (from start which defaults to 0)
-            and the values obtained from iterating over iterable.
-
-        zip(*iterables, strict=False) :
-            Iterate over several iterables in parallel, producing tuples with an item from each one.
-
-        f"{'Hi':<{width}}"   # 'Hi        '  — 2 chars + 8 spaces = 10 total
-        f"{'Hi':>{width}}"   # '        Hi'  — 8 spaces + 2 chars = 10 total (right align)
-        f"{'Hi':^{width}}"   # '    Hi    '  — centered (center align)
     """
-    width = 22
-
-    def card_lines(i: int, card: Card) -> list[str]:
-        lines = []
-        lines.append(f"  ┌{'─' * (width - 3)}[{Color.blue(str(i))}]┐")
-        lines.append(f"  │ {Color.bold(card.name):<{width + 7}}│")
-        lines.append(f"  │ {Color.yellow(f'Cost: {card.cost}'):<{width + 8}}│")
-        lines.append(f"  │ {card.description[:width - 1]:<{width - 1}}│")
-        if card.damage > 0:
-            lines.append(f"  │ {Color.red(f'Damage: {card.damage}'):<{width + 8}}│")
-        else:
-            lines.append(f"  │{' ' * width}│")
-        if card.block > 0:
-            lines.append(f"  │ {Color.cyan(f'Block:  {card.block}'):<{width + 8}}│")
-        else:
-            lines.append(f"  │{' ' * width}│")
-        lines.append(f"  └{'─' * width}┘")
-        return lines
-
-    all_cards_lines = [card_lines(i, card) for i, card in enumerate(hand, 1)]
-
     print(f"\n{Color.bold('Your hand:')}")
-    for row in zip(*all_cards_lines):
-        print("".join(row))
+    _display_cards(hand)
+
+def display_rewards(rewards: list[Card]):
+    """
+        Display reward cards side by side with color coding.
+        Same layout as hand cards — name, cost, description, damage, block.
+    """
+    print(f"\n{Color.bold('Choose a card to add to your deck:')}")
+    _display_cards(rewards)
+    print(f"\n  {Color.blue('0.')} Skip")
 
 def display_enemy(enemy: Enemy):
     """
@@ -116,3 +91,45 @@ def display_separator():
     """
     width = 40
     print(f"{Color.blue('─' * width)}")
+
+def _card_lines(i: int, card: Card, width: int = 22) -> list[str]:
+    """
+        Internal helper, builds the list of lines for a single card.
+        Used by both display_hand() and display_rewards().
+
+        f"{'Hi':<{width}}"   # 'Hi        '  — 2 chars + 8 spaces = 10 total
+        f"{'Hi':>{width}}"   # '        Hi'  — 8 spaces + 2 chars = 10 total (right align)
+        f"{'Hi':^{width}}"   # '    Hi    '  — centered (center align)
+    """
+    lines = []
+    lines.append(f"  ┌{'─' * (width - 3)}[{Color.blue(str(i))}]┐")
+    lines.append(f"  │ {Color.bold(card.name):<{width + 7}}│")
+    lines.append(f"  │ {Color.yellow(f'Cost: {card.cost}'):<{width + 8}}│")
+    lines.append(f"  │ {card.description[:width - 1]:<{width - 1}}│")
+    if card.damage > 0:
+        lines.append(f"  │ {Color.red(f'Damage: {card.damage}'):<{width + 8}}│")
+    else:
+        lines.append(f"  │{' ' * width}│")
+    if card.block > 0:
+        lines.append(f"  │ {Color.cyan(f'Block:  {card.block}'):<{width + 8}}│")
+    else:
+        lines.append(f"  │{' ' * width}│")
+    lines.append(f"  └{'─' * width}┘")
+    return lines
+
+def _display_cards(cards: list[Card]):
+    """
+        Internal helper, displays a list of cards side by side.
+        Used by both display_hand() and display_rewards().
+
+        enumerate(iterable, start=0) :
+                Return an enumerate object. iterable must be a sequence, an iterator, or some other object which supports iteration.
+                The __next__() method of the iterator returned by enumerate() returns a tuple containing a count (from start which defaults to 0)
+                and the values obtained from iterating over iterable.
+
+        zip(*iterables, strict=False) :
+            Iterate over several iterables in parallel, producing tuples with an item from each one.
+    """
+    all_cards_lines = [_card_lines(i, card) for i, card in enumerate(cards, 1)]
+    for row in zip(*all_cards_lines):
+        print("".join(row))
