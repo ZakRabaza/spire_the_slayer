@@ -1,4 +1,5 @@
 import random
+from typing import Self
 
 
 class Card:
@@ -25,6 +26,16 @@ class Card:
         self.damage = damage
         self.block = block
         self.rarity = rarity
+
+    @classmethod
+    def from_db_row(cls, row: tuple) -> Self:
+        """
+            Factory method — construct a Card from a database row.
+
+            cls : the class (Card itself, not any specific card)
+        """
+        id, name, max_hp, actions = row
+        return cls(id, name, max_hp, actions)
 
     def __repr__(self):
         """
@@ -220,6 +231,15 @@ class Enemy:
         self.strength = 0
         self.actions = actions
         self._action_index = 0
+
+    @classmethod
+    def from_db_row(cls, row: tuple) -> Self:
+        """
+            Factory method — construct an Enemy from a database row.
+
+            cls : the class (Card itself, not any specific card)
+        """
+        return cls(*row)
 
     def get_intent(self) -> dict:
         """

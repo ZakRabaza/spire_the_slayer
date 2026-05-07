@@ -44,7 +44,7 @@ def get_reward_cards(n: int = 3) -> list[Card]:
                 LIMIT %s
             """, (n,))
             rows = cur.fetchall()
-        return [Card(*row) for row in rows]
+        return [Card.from_db_row(row) for row in rows]
     finally:
         conn.close()
 
@@ -70,8 +70,7 @@ def get_enemy_for_floor(floor: int) -> Enemy:
             row = cur.fetchone()
         if row is None:
             raise ValueError(f"No enemy found for floor {floor}")
-        id, name, max_hp, actions = row
-        return Enemy(id, name, max_hp, actions)
+        return Enemy.from_db_row(row)
     finally:
         conn.close()
 
@@ -160,7 +159,7 @@ def get_deck_for_run(run_id: int) -> list[Card]:
                 WHERE rc.run_id = %s
             """, (run_id,))
             rows = cur.fetchall()
-        return [Card(*row) for row in rows]
+        return [Card.from_db_row(row) for row in rows]
     finally:
         conn.close()
 
