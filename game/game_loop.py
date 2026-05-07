@@ -2,7 +2,8 @@ from game.models import Card, Deck, Player, Enemy
 from game.combat import CombatEngine
 from game.colors import Color
 from game.display import (
-    display_hand, display_enemy, display_player, display_floor, display_separator, display_ongoing_runs, display_rewards
+    display_hand, display_enemy, display_player, display_floor, display_separator, display_ongoing_runs, display_rewards,
+    display_draw_pile, display_discard_pile
 )
 from db.database import (
     get_run, get_deck_for_run,get_enemy_for_floor, get_reward_cards, save_run_after_combat, end_run, get_ongoing_runs
@@ -41,10 +42,25 @@ def run_combat(player: Player, enemy: Enemy) -> bool:
         display_hand(player.deck.hand)
 
         print(f"\n  {Color.blue('0.')} End turn")
+        print(f"  {Color.blue('d.')} View draw pile "
+              f"{Color.blue(str(len(player.deck.draw_pile)))} cards")
+        print(f"  {Color.blue('x.')} View discard pile "
+              f"{Color.blue(str(len(player.deck.discard_pile)))} cards")
+
         action = input(f"\n{Color.bold('Your choice: ')}").strip()
 
         if action == "0":
             combat.end_turn()
+            continue
+
+        if action == "d":
+            display_draw_pile(player.deck.draw_pile)
+            input(f"\n{Color.bold(Color.blue('Press Enter to continue...'))}")
+            continue
+
+        if action == "x":
+            display_discard_pile(player.deck.discard_pile)
+            input(f"\n{Color.bold(Color.blue('Press Enter to continue...'))}")
             continue
 
         if not action.isdigit():

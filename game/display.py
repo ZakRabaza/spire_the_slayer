@@ -48,6 +48,27 @@ def display_hand(hand: list[Card]):
     print(f"\n{Color.bold('Your hand:')}")
     _display_cards(hand)
 
+def display_draw_pile(draw_pile: list[Card]):
+    """
+        Display all cards in the draw pile side by side.
+    """
+    if not draw_pile:
+        print(Color.yellow("\nDraw pile is empty."))
+        return
+    print(f"\n{Color.bold('Draw pile:')} {Color.blue(str(len(draw_pile)))} cards")
+    _display_cards(draw_pile)
+
+
+def display_discard_pile(discard_pile: list[Card]):
+    """
+        Display all cards in the discard pile side by side.
+    """
+    if not discard_pile:
+        print(Color.yellow("\nDiscard pile is empty."))
+        return
+    print(f"\n{Color.bold('Discard pile:')} {Color.blue(str(len(discard_pile)))} cards")
+    _display_cards(discard_pile)
+
 def display_rewards(rewards: list[Card]):
     """
         Display reward cards side by side with color coding.
