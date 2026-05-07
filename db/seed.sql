@@ -19,9 +19,9 @@ INSERT INTO cards (name, card_type, cost, description, damage, block, rarity, pl
 VALUES
     ('Bludgeon',      'attack', 3, 'Deal 32 damage.',       32, 0, 'uncommon', true),
     ('Hemokinesis',   'attack', 1, 'Lose 2 HP. Deal 15 damage.', 15, 0, 'uncommon', true),
-    ('Battle Trance', 'skill',  0, 'Draw 3 cards.',          0,  0, 'uncommon', false),
+    ('Battle Trance', 'skill',  0, 'Draw 3 cards.',          0,  0, 'uncommon', true),
     ('Taunt',         'skill',  1, 'Gain 7 block. Apply 1 Vulnerable.',          0,  7, 'uncommon', true),
-    ('Inflame',       'power',  1, 'Gain 2 strength.',       0,  0, 'uncommon', false)
+    ('Inflame',       'power',  1, 'Gain 2 strength.',       0,  0, 'uncommon', true)
 ON CONFLICT (name) DO NOTHING;
 
 -- Rare cards
