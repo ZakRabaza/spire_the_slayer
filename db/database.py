@@ -153,7 +153,7 @@ def get_deck_for_run(run_id: int) -> list[Card]:
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT c.id, c.name, c.card_type, c.cost, c.description, c.damage, c.block, c.rarity
+                SELECT c.id, c.name, c.card_type, c.cost, c.description, c.damage, c.block, c.rarity, c.effects
                 FROM run_cards rc
                 JOIN cards c ON c.id = rc.card_id
                 WHERE rc.run_id = %s
