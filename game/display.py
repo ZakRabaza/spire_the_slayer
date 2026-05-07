@@ -38,7 +38,8 @@ def display_player(player: Player):
     print(f"{Color.bold(player.name)} "
           f"HP: {Color.hp_color(player.hp, player.max_hp)} "
           f"Block: {Color.cyan(str(player.block))} "
-          f"Energy: {Color.yellow(str(player.energy))}")
+          f"Energy: {Color.yellow(str(player.energy))} "
+          f"Strength: {Color.red(str(player.strength))} ")
 
 def display_hand(hand: list[Card]):
     """
