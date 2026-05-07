@@ -2,7 +2,7 @@ import random
 from typing import Self
 
 class Card:
-    def __init__(self, id: int, name: str, card_type: str,cost: int, description: str,damage: int, block: int, rarity: str):
+    def __init__(self, id: int, name: str, card_type: str,cost: int, description: str,damage: int, block: int, rarity: str, effects: list[dict] = None):
         """
             Initialize a Card from a row in the cards table.
 
@@ -25,17 +25,35 @@ class Card:
         self.damage = damage
         self.block = block
         self.rarity = rarity
+        self.effects = effects or []
 
     def apply(self, player: "Player", enemy: "Enemy"):
         """
             Apply the card effect to the player and enemy.
-            Default implementation handles damage and block.
+            Damage and block are always applied first, then JSONB effects are processed in sequence.
             Subclasses override this for special effects.
         """
         if self.damage > 0:
             enemy.take_damage(self.damage + player.strength)
         if self.block > 0:
             player.gain_block(self.block)
+        for effect in self.effects:
+            self._apply_effect(effect, player, enemy)
+
+    def _apply_effect(self, effect: dict, player: "Player", enemy: "Enemy"):
+        """
+            Internal dispatcher, apply a single effect dict.
+            Adding a new effect type only requires a new elif here.
+        """
+        effect_type = effect["type"]
+        value = effect["value"]
+
+        if effect_type == "strength":
+            player.strength += value
+        elif effect_type == "draw":
+            player.deck.draw(value)
+        elif effect_type == "hp_loss":
+            player.take_damage(value)
 
     @classmethod
     def from_db_row(cls, row: tuple) -> Self:
@@ -44,9 +62,7 @@ class Card:
 
             cls : the class (Card itself, not any specific card)
         """
-        name = row[1]
-        card_class = CARD_REGISTRY.get(name, cls)
-        return card_class(*row)
+        return cls(*row)
 
     def __repr__(self):
         """
@@ -64,32 +80,6 @@ class Card:
             (e.g. strings, integers) which would cause an AttributeError when accessing .id on an object that doesn't have it.
         """
         return isinstance(other, Card) and self.id == other.id
-
-
-class BattleTranceCard(Card):
-    """Draw 3 cards."""
-    def apply(self, player: "Player", enemy: "Enemy"):
-        player.deck.draw(3)
-
-
-class HemokinesisCard(Card):
-    """Lose 2 HP. Deal 15 damage."""
-    def apply(self, player: "Player", enemy: "Enemy"):
-        player.take_damage(2)
-        enemy.take_damage(self.damage + player.strength)
-
-
-class InflameCard(Card):
-    """Gain 2 strength."""
-    def apply(self, player: "Player", enemy: "Enemy"):
-        player.strength += self.damage
-
-CARD_REGISTRY = {
-    "Battle Trance": BattleTranceCard,
-    "Hemokinesis":   HemokinesisCard,
-    "Inflame":       InflameCard,
-}
-
 
 class Deck:
     def __init__(self, cards: list[Card]):
