@@ -1,7 +1,6 @@
 import random
 from typing import Self
 
-
 class Card:
     def __init__(self, id: int, name: str, card_type: str,cost: int, description: str,damage: int, block: int, rarity: str):
         """
@@ -27,6 +26,17 @@ class Card:
         self.block = block
         self.rarity = rarity
 
+    def apply(self, player: "Player", enemy: "Enemy"):
+        """
+            Apply the card effect to the player and enemy.
+            Default implementation handles damage and block.
+            Subclasses override this for special effects.
+        """
+        if self.damage > 0:
+            enemy.take_damage(self.damage + player.strength)
+        if self.block > 0:
+            player.gain_block(self.block)
+
     @classmethod
     def from_db_row(cls, row: tuple) -> Self:
         """
@@ -34,8 +44,9 @@ class Card:
 
             cls : the class (Card itself, not any specific card)
         """
-        id, name, max_hp, actions = row
-        return cls(id, name, max_hp, actions)
+        name = row[1]
+        card_class = CARD_REGISTRY.get(name, cls)
+        return card_class(*row)
 
     def __repr__(self):
         """
@@ -53,6 +64,32 @@ class Card:
             (e.g. strings, integers) which would cause an AttributeError when accessing .id on an object that doesn't have it.
         """
         return isinstance(other, Card) and self.id == other.id
+
+
+class BattleTranceCard(Card):
+    """Draw 3 cards."""
+    def apply(self, player: "Player", enemy: "Enemy"):
+        player.deck.draw(3)
+
+
+class HemokinesisCard(Card):
+    """Lose 2 HP. Deal 15 damage."""
+    def apply(self, player: "Player", enemy: "Enemy"):
+        player.take_damage(2)
+        enemy.take_damage(self.damage + player.strength)
+
+
+class InflameCard(Card):
+    """Gain 2 strength."""
+    def apply(self, player: "Player", enemy: "Enemy"):
+        player.strength += self.damage
+
+CARD_REGISTRY = {
+    "Battle Trance": BattleTranceCard,
+    "Hemokinesis":   HemokinesisCard,
+    "Inflame":       InflameCard,
+}
+
 
 class Deck:
     def __init__(self, cards: list[Card]):
@@ -237,9 +274,10 @@ class Enemy:
         """
             Factory method — construct an Enemy from a database row.
 
-            cls : the class (Card itself, not any specific card)
+            cls : the class ( Enemy itself, not any specific enemy)
         """
-        return cls(*row)
+        id, name, max_hp, actions = row
+        return cls(id, name, max_hp, actions)
 
     def get_intent(self) -> dict:
         """

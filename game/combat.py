@@ -28,10 +28,7 @@ class CombatEngine:
 
         self.player.energy -= card.cost
 
-        if card.damage > 0:
-            self.enemy.take_damage(card.damage + self.player.strength)
-        if card.block > 0:
-            self.player.gain_block(card.block)
+        card.apply(self.player, self.enemy)
 
         self.player.deck.discard(card)
 
