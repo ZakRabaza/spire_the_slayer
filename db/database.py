@@ -37,7 +37,7 @@ def get_reward_cards(n: int = 3) -> list[Card]:
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT id, name, card_type, cost, description, damage, block, rarity
+                SELECT id, name, card_type, cost, description, damage, block, rarity, effects
                 FROM cards
                 WHERE playable = true
                 ORDER BY RANDOM()
