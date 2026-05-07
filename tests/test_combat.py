@@ -49,7 +49,7 @@ class TestCombatEngine(unittest.TestCase):
         hand_size = len(self.player.deck.hand)
         self.combat.play_card(strike)
         self.assertEqual(len(self.player.deck.hand), hand_size - 1, "Played card should be removed from hand")
-        self.assertEqual(len(self.player.deck.discard_pile), "Played card should appear in discard pile")
+        self.assertEqual(len(self.player.deck.discard_pile), 1, "Played card should appear in discard pile")
 
     def test_play_card_not_in_hand_raises(self):
         fake = Card(99, "Fake", "attack", 1, "Fake.", 6, 0, "common")
