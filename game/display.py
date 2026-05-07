@@ -58,7 +58,6 @@ def display_draw_pile(draw_pile: list[Card]):
     print(f"\n{Color.bold('Draw pile:')} {Color.blue(str(len(draw_pile)))} cards")
     _display_cards(draw_pile)
 
-
 def display_discard_pile(discard_pile: list[Card]):
     """
         Display all cards in the discard pile side by side.
@@ -141,7 +140,7 @@ def _card_lines(i: int, card: Card, width: int = 22) -> list[str]:
 def _display_cards(cards: list[Card]):
     """
         Internal helper, displays a list of cards side by side.
-        Used by both display_hand() and display_rewards().
+        Used by both display_hand() and display_rewards() display_draw_pile()and display_discard_pile().
 
         enumerate(iterable, start=0) :
                 Return an enumerate object. iterable must be a sequence, an iterator, or some other object which supports iteration.
@@ -151,6 +150,13 @@ def _display_cards(cards: list[Card]):
         zip(*iterables, strict=False) :
             Iterate over several iterables in parallel, producing tuples with an item from each one.
     """
-    all_cards_lines = [_card_lines(i, card) for i, card in enumerate(cards, 1)]
-    for row in zip(*all_cards_lines):
-        print("".join(row))
+    row_size = 5
+
+    for row_start in range(0, len(cards), row_size):
+        row = cards[row_start : row_start + row_size]
+
+        all_cards_lines = [_card_lines(i, card) for i, card in enumerate(row, row_start + 1)]
+
+        for line in zip(*all_cards_lines):
+            print("".join(line))
+        print()  # blank line between rows
