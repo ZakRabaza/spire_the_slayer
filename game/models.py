@@ -15,6 +15,7 @@ class Card:
                 damage:      Damage dealt to the enemy when played.
                 block:       Block gained by the player when played.
                 rarity:      'starter', 'common', 'uncommon', or 'rare'.
+                effects:     List of effects dicts loaded from the JSONB column in the card table.
         """
 
         self.id = id
